@@ -1,12 +1,12 @@
 [submodule "llama.cpp"]
-	path = llama.cpp
+	path = external/llama.cpp
 	url = git@github.com:ggml-org/llama.cpp.git
 [submodule "ollama"]
-	path = ollama
+	path = external/ollama
 	url = git@github.com:ollama/ollama.git
 [submodule "ik_llama.cpp"]
-	path = ik_llama.cpp
+	path = external/ik_llama.cpp
 	url = https://github.com/ikawrakow/ik_llama.cpp
 [submodule "Kokoro-FastAPI"]
-	path = Kokoro-FastAPI
+	path = external/Kokoro-FastAPI
 	url = https://github.com/remsky/Kokoro-FastAPI.git

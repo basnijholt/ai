@@ -1,51 +1,84 @@
+# Configuration
+cmake_flags := '-DGGML_CUDA=ON -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86"'
+build_release := "cmake --build build --config Release -j 24"
+
+# Aliases
+alias b := build
+alias r := rebuild
+alias s := sync
+alias c := clean
+
 default:
     @just --list
 
-# --- All ---
+# ==========================================
+# Aggregate Commands
+# ==========================================
 
-build: build-llama-cpp build-ik build-ollama
-rebuild: rebuild-llama-cpp rebuild-ik rebuild-ollama
-sync: sync-llama-cpp sync-ik sync-ollama
-clean: clean-llama-cpp clean-ik clean-ollama
+# Build all projects from scratch
+build: build-llama build-ik build-ollama
 
-# --- llama.cpp ---
+# Rebuild all projects incrementally
+rebuild: rebuild-llama rebuild-ik rebuild-ollama
 
-build-llama-cpp:
-    cd llama.cpp && cmake -B build -DGGML_CUDA=ON -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86" && cmake --build build --config Release -j 24
+# Update all repositories (git pull)
+sync: sync-llama sync-ik sync-ollama
 
-rebuild-llama-cpp:
-    cd llama.cpp && cmake --build build --config Release -j 24
+# Clean all build artifacts
+clean: clean-llama clean-ik clean-ollama
 
-clean-llama-cpp:
-    rm -rf llama.cpp/build
+# ==========================================
+# Kokoro TTS
+# ==========================================
 
-sync-llama-cpp:
-    cd llama.cpp && git checkout master && git pull origin master
+# Start the Kokoro FastAPI server (GPU)
+start-kokoro:
+    cd external/Kokoro-FastAPI && ./start-gpu.sh
 
-# --- ik_llama.cpp ---
+# ==========================================
+# llama.cpp
+# ==========================================
+
+build-llama:
+    cd external/llama.cpp && cmake -B build {{cmake_flags}} && {{build_release}}
+
+rebuild-llama:
+    cd external/llama.cpp && {{build_release}}
+
+clean-llama:
+    rm -rf external/llama.cpp/build
+
+sync-llama:
+    cd external/llama.cpp && git checkout master && git pull origin master
+
+# ==========================================
+# ik_llama.cpp
+# ==========================================
 
 build-ik:
-    cd ik_llama.cpp && cmake -B build -DGGML_CUDA=ON -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86" && cmake --build build --config Release -j 24
+    cd external/ik_llama.cpp && cmake -B build {{cmake_flags}} && {{build_release}}
 
 rebuild-ik:
-    cd ik_llama.cpp && cmake --build build --config Release -j 24
+    cd external/ik_llama.cpp && {{build_release}}
 
 clean-ik:
-    rm -rf ik_llama.cpp/build
+    rm -rf external/ik_llama.cpp/build
 
 sync-ik:
-    cd ik_llama.cpp && git checkout main && git pull origin main
+    cd external/ik_llama.cpp && git checkout main && git pull origin main
 
-# --- Ollama ---
+# ==========================================
+# Ollama
+# ==========================================
 
 build-ollama:
-    cd ollama && cmake -B build -DGGML_CUDA=ON -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86" && cmake --build build --config Release -j 24 && go build .
+    cd external/ollama && cmake -B build {{cmake_flags}} && {{build_release}} && go build .
 
 rebuild-ollama:
-    cd ollama && cmake --build build --config Release -j 24 && go build .
+    cd external/ollama && {{build_release}} && go build .
 
 clean-ollama:
-    rm -rf ollama/build ollama/ollama
+    rm -rf external/ollama/build external/ollama/ollama
 
 sync-ollama:
-    cd ollama && git checkout main && git pull origin main
+    cd external/ollama && git checkout main && git pull origin main
