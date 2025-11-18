@@ -7,3 +7,6 @@
 [submodule "ik_llama.cpp"]
 	path = ik_llama.cpp
 	url = https://github.com/ikawrakow/ik_llama.cpp
+[submodule "Kokoro-FastAPI"]
+	path = Kokoro-FastAPI
+	url = https://github.com/remsky/Kokoro-FastAPI.git
