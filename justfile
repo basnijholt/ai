@@ -32,26 +32,13 @@ clean: clean-llama clean-ik clean-ollama
 commit-submodules:
     #!/usr/bin/env bash
     set -euo pipefail
-    if git diff --cached --quiet && git diff-files --quiet external/; then
+    git add external/
+    if git diff --cached --quiet -- external/; then
         echo "No submodule changes to commit"
         exit 0
     fi
-    git add external/
-    updated_modules=$(git diff --cached --name-only | grep '^external/' | cut -d'/' -f2 | sort -u | paste -sd', ')
-    # Get info only for updated submodules
-    submodule_info=""
-    for module in $(echo "$updated_modules" | tr ',' ' '); do
-        commit_hash=$(git submodule status "external/$module" | awk '{print substr($1, 1, 8)}')
-        submodule_info="${submodule_info}- external/$module @ $commit_hash"$'\n'
-    done
-    commit_msg=$(cat <<EOF
-    chore: update submodules - ${updated_modules}
-
-    Updated submodules to latest versions:
-    ${submodule_info}
-    EOF
-    )
-    git commit -m "${commit_msg}"
+    modules=$(git diff --cached --name-only -- external/ | xargs -n1 basename | paste -sd, -)
+    git commit -m "chore: update submodules - $modules"
 
 # ==========================================
 # Agent CLI
