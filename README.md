@@ -76,7 +76,7 @@ You can also target specific projects:
 > [!NOTE]
 > This setup is specifically tailored for a machine with **NVIDIA CUDA-compatible hardware**.
 
-*   **Build Flags:** Configured in `justfile`. These include flags for CUDA support and hardware-specific architectures (e.g., targeting NVIDIA Ampere GPUs).
+*   **Build Flags:** Configured in `justfile`. These include flags for CUDA support and hardware-specific architectures (e.g., targeting NVIDIA GPUs).
 *   **Environment:** Defined in `shell.nix`. It ensures `LD_LIBRARY_PATH` includes necessary CUDA and C++ libraries for Python extensions.
 
 ## 🖥️ System Configuration
