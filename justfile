@@ -22,10 +22,17 @@ build: build-llama build-ik build-ollama
 rebuild: rebuild-llama rebuild-ik rebuild-ollama
 
 # Update all repositories (git pull)
-sync: sync-llama sync-ik sync-ollama sync-kokoro
+sync: sync-llama sync-ik sync-ollama sync-kokoro sync-agent-cli
 
 # Clean all build artifacts
 clean: clean-llama clean-ik clean-ollama
+
+# ==========================================
+# Agent CLI
+# ==========================================
+
+sync-agent-cli:
+    cd external/agent-cli && git checkout main && git pull origin main
 
 # ==========================================
 # Kokoro TTS
@@ -37,6 +44,14 @@ start-kokoro:
 
 sync-kokoro:
     cd external/Kokoro-FastAPI && git checkout master && git pull origin master
+
+# ==========================================
+# Faster Whisper
+# ==========================================
+
+# Start the faster-whisper server (GPU)
+start-faster-whisper:
+    nix-shell --run "uv run --script external/agent-cli/scripts/run_faster_whisper_server.py --device cuda --compute-type float16"
 
 # ==========================================
 # llama.cpp
