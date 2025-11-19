@@ -90,7 +90,7 @@ sync-ik:
 # ==========================================
 
 build-ollama:
-    cd external/ollama && cmake -B build {{cmake_flags}} && {{build_release}} && go build .
+    cd external/ollama && cmake -B build -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86" -DGGML_BLAS_VENDOR=OpenBLAS && {{build_release}} && go build .
 
 rebuild-ollama:
     cd external/ollama && {{build_release}} && go build .
