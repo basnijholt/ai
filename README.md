@@ -79,6 +79,10 @@ You can also target specific projects:
     ```
 *   **Environment:** Defined in `shell.nix`. It ensures `LD_LIBRARY_PATH` includes necessary CUDA and C++ libraries for Python extensions (fixing common `libstdc++` issues).
 
+## 🖥️ System Configuration
+
+My complete NixOS configuration, which powers this setup, can be found in my [dotfiles](https://github.com/basnijholt/dotfiles).
+
 ## 📝 License
 
 This meta-repository is for personal organization. Each submodule retains its own license.
