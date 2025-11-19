@@ -54,6 +54,7 @@ The `justfile` defines all available commands.
 | `just build` | `just b` | Compiles `llama.cpp`, `ik_llama.cpp`, and `ollama` from scratch. |
 | `just rebuild` | `just r` | Incrementally recompiles all projects. |
 | `just sync` | `just s` | Pulls the latest changes for **all** submodules from their upstream remotes. |
+| `just commit-submodules` | `just cs` | Commits submodule updates with an auto-generated message (only updated modules). |
 | `just clean` | `just c` | Removes build artifacts for all projects. |
 
 ### Running Services

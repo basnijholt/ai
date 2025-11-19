@@ -7,6 +7,7 @@ alias b := build
 alias r := rebuild
 alias s := sync
 alias c := clean
+alias cs := commit-submodules
 
 default:
     @just --list
@@ -26,6 +27,31 @@ sync: sync-llama sync-ik sync-ollama sync-kokoro sync-agent-cli
 
 # Clean all build artifacts
 clean: clean-llama clean-ik clean-ollama
+
+# Commit submodule updates after sync
+commit-submodules:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if git diff --cached --quiet && git diff-files --quiet external/; then
+        echo "No submodule changes to commit"
+        exit 0
+    fi
+    git add external/
+    updated_modules=$(git diff --cached --name-only | grep '^external/' | cut -d'/' -f2 | sort -u | paste -sd', ')
+    # Get info only for updated submodules
+    submodule_info=""
+    for module in $(echo "$updated_modules" | tr ',' ' '); do
+        commit_hash=$(git submodule status "external/$module" | awk '{print substr($1, 1, 8)}')
+        submodule_info="${submodule_info}- external/$module @ $commit_hash"$'\n'
+    done
+    commit_msg=$(cat <<EOF
+    chore: update submodules - ${updated_modules}
+
+    Updated submodules to latest versions:
+    ${submodule_info}
+    EOF
+    )
+    git commit -m "${commit_msg}"
 
 # ==========================================
 # Agent CLI
