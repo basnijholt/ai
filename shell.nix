@@ -2,6 +2,9 @@
 
 pkgs.mkShell {
   name = "ai-lab-env";
+  
+  # Allow building with -march=native
+  NIX_ENFORCE_NO_NATIVE = "0";
 
   buildInputs = with pkgs; [
     # Build tools
