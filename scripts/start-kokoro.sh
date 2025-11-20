@@ -9,13 +9,13 @@ PROJECT_ROOT=$(pwd)
 KOKORO_DIR="external/Kokoro-FastAPI"
 
 # Create virtual environment if it doesn't exist (in the root)
-if [ ! -d ".venv" ]; then
-    echo "Creating virtual environment in .venv..."
-    uv venv
+if [ ! -d ".venv-kokoro" ]; then
+    echo "Creating virtual environment in .venv-kokoro..."
+    uv venv .venv-kokoro
 fi
 
 # Activate virtual environment
-source .venv/bin/activate
+source .venv-kokoro/bin/activate
 
 # Navigate to the submodule
 if [ ! -d "$KOKORO_DIR" ]; then
