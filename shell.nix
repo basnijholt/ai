@@ -75,19 +75,21 @@ pkgs.mkShell {
     export LIBRARY_PATH=${
       pkgs.lib.makeLibraryPath [
         pkgs.cudaPackages.cudatoolkit
+        pkgs.cudaPackages.cuda_cudart
         pkgs.zlib
         pkgs.openssl
       ]
-    }:$LIBRARY_PATH
+    }:/run/opengl-driver/lib:$LIBRARY_PATH
 
     export PATH="${pkgs.cudaPackages.cuda_nvcc}/bin:${pkgs.glibc.bin}/bin:$PATH"
 
     # SSL Certificate for Python/uv
     export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
 
-    # Triton CUDA library path (avoids ldconfig call on NixOS)
-    export TRITON_LIBCUDA_PATH="${pkgs.cudaPackages.cuda_cudart}/lib"
+    # Tell Triton where to find libcuda.so (avoids calling /sbin/ldconfig on NixOS)
+    export TRITON_LIBCUDA_PATH=/run/opengl-driver/lib
 
     echo "Environment loaded. Use 'just' to run commands."
+    echo "TRITON_LIBCUDA_PATH: $TRITON_LIBCUDA_PATH"
   '';
 }
