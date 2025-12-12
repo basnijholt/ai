@@ -46,12 +46,27 @@ commit-submodules:
 # ==========================================
 
 install-bin:
-    @mkdir -p bin
-    @echo "Linking binaries to bin/..."
-    # Link C++ binaries (llama.cpp, ik_llama.cpp)
-    @fd --type x --absolute-path . external/{llama,ik_llama}.cpp/build/bin --exec ln -sf {} bin/ 2>/dev/null || true
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p bin
+    echo "Linking binaries to bin/..."
+
+    # Clean up old binaries/libraries
+    rm -rf bin/*
+
+    # Common exclusions for libraries
+    EXCLUDE="-E *.so -E *.so.* -E *.dylib -E *.dll -E *.a"
+
+    # Link llama.cpp binaries (standard names)
+    fd --type x --absolute-path $EXCLUDE . external/llama.cpp/build/bin --exec ln -sf {} bin/ 2>/dev/null || true
+
+    # Link ik_llama.cpp binaries (prefixed with ik-)
+    fd --type x --absolute-path $EXCLUDE . external/ik_llama.cpp/build/bin 2>/dev/null | while read -r file; do
+        ln -sf "$file" "bin/ik-$(basename "$file")"
+    done || true
+
     # Link Ollama binary
-    @fd --type x --absolute-path --max-depth 1 ollama external/ollama --exec ln -sf {} bin/ 2>/dev/null || true
+    fd --type x --absolute-path --max-depth 1 ollama external/ollama --exec ln -sf {} bin/ 2>/dev/null || true
 
 
 # ==========================================
