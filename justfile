@@ -17,16 +17,17 @@ default:
 # ==========================================
 
 # Build all projects from scratch
-build: build-llama build-ik build-ollama
+build: build-llama build-ik build-ollama install-bin
 
 # Rebuild all projects incrementally
-rebuild: rebuild-llama rebuild-ik rebuild-ollama
+rebuild: rebuild-llama rebuild-ik rebuild-ollama install-bin
 
 # Update all repositories (git pull)
 sync: sync-llama sync-ik sync-ollama sync-kokoro sync-agent-cli sync-comfyui
 
 # Clean all build artifacts
 clean: clean-llama clean-ik clean-ollama
+	rm -rf bin/
 
 # Commit submodule updates after sync
 commit-submodules:
@@ -39,6 +40,19 @@ commit-submodules:
     fi
     modules=$(git diff --cached --name-only -- external/ | xargs -n1 basename | paste -sd, -)
     git commit -m "chore: update submodules - $modules"
+
+# ==========================================
+# Helpers
+# ==========================================
+
+install-bin:
+    @mkdir -p bin
+    @echo "Linking binaries to bin/..."
+    # Link C++ binaries (llama.cpp, ik_llama.cpp)
+    @fd --type x --absolute-path . external/{llama,ik_llama}.cpp/build/bin --exec ln -sf {} bin/ 2>/dev/null || true
+    # Link Ollama binary
+    @fd --type x --absolute-path --max-depth 1 ollama external/ollama --exec ln -sf {} bin/ 2>/dev/null || true
+
 
 # ==========================================
 # Agent CLI

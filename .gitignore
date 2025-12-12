@@ -4,3 +4,4 @@
 .vscode/
 *.swp
 result
+bin/

@@ -43,6 +43,8 @@ pkgs.mkShell {
     curl
     openblas
     ccache
+    fd
+    ripgrep
   ];
 
   shellHook = ''
