@@ -74,33 +74,38 @@ install-bin:
 # ==========================================
 
 sync-agent-cli:
-    cd external/agent-cli && git checkout main && git pull origin main
+    cd external/agent-cli && git checkout main && git pull --ff-only origin main
 
 # ==========================================
 # Kokoro TTS
 # ==========================================
 
 # Start the Kokoro FastAPI server (GPU)
-start-kokoro:
-    nix-shell --run ./scripts/start-kokoro.sh
+start-kokoro port="8880":
+    nix-shell --run "./scripts/start-kokoro.sh {{port}}"
 
 sync-kokoro:
-    cd external/Kokoro-FastAPI && git checkout master && git pull origin master
+    cd external/Kokoro-FastAPI && git checkout master && git pull --ff-only origin master
 
 # ==========================================
 # Faster Whisper
 # ==========================================
 
-# Start the faster-whisper server (GPU)
-start-faster-whisper:
-    nix-shell --run "uv run --script external/agent-cli/scripts/run_faster_whisper_server.py --device cuda --compute-type float16"
+# Install the faster-whisper server without changing upstream's lockfile
+install-faster-whisper:
+    uv venv --allow-existing external/agent-cli/.venv --python 3.12
+    uv pip install --python external/agent-cli/.venv/bin/python --upgrade -e 'external/agent-cli[faster-whisper]'
+
+# Start the faster-whisper HTTP server (GPU)
+start-faster-whisper port="8811" model="large-v3":
+    nix-shell --run "uv run --no-sync --project external/agent-cli agent-cli server whisper --device cuda --compute-type float16 --port {{port}} --model {{model}} --cache-dir external/agent-cli/.venv/model-cache --no-wyoming"
 
 # ==========================================
 # llama.cpp
 # ==========================================
 
 build-llama:
-    cd external/llama.cpp && cmake -B build {{cmake_flags}} && {{build_release}}
+    cd external/llama.cpp && cmake --fresh -B build {{cmake_flags}} && {{build_release}}
 
 rebuild-llama:
     cd external/llama.cpp && {{build_release}}
@@ -109,14 +114,14 @@ clean-llama:
     rm -rf external/llama.cpp/build
 
 sync-llama:
-    cd external/llama.cpp && git checkout master && git pull origin master
+    cd external/llama.cpp && git checkout master && git pull --ff-only origin master
 
 # ==========================================
 # ik_llama.cpp
 # ==========================================
 
 build-ik:
-    cd external/ik_llama.cpp && cmake -B build {{cmake_flags}} && {{build_release}}
+    cd external/ik_llama.cpp && cmake --fresh -B build {{cmake_flags}} && {{build_release}}
 
 rebuild-ik:
     cd external/ik_llama.cpp && {{build_release}}
@@ -125,23 +130,23 @@ clean-ik:
     rm -rf external/ik_llama.cpp/build
 
 sync-ik:
-    cd external/ik_llama.cpp && git checkout main && git pull origin main
+    cd external/ik_llama.cpp && git checkout main && git pull --ff-only origin main
 
 # ==========================================
 # Ollama
 # ==========================================
 
 build-ollama:
-    cd external/ollama && cmake -B build -DGGML_BLAS=ON -DGGML_NATIVE=ON -DCMAKE_CUDA_ARCHITECTURES="86" -DGGML_BLAS_VENDOR=OpenBLAS && {{build_release}} && go build .
+    cd external/ollama && cmake --fresh -B build -DOLLAMA_LLAMA_BACKENDS=cuda_v12 -DCMAKE_CUDA_ARCHITECTURES=86 -DOLLAMA_VERSION="$(git describe --tags --always)" && {{build_release}}
 
 rebuild-ollama:
-    cd external/ollama && {{build_release}} && go build .
+    cd external/ollama && {{build_release}}
 
 clean-ollama:
     rm -rf external/ollama/build external/ollama/ollama
 
 sync-ollama:
-    cd external/ollama && git checkout main && git pull origin main
+    cd external/ollama && git checkout main && git pull --ff-only origin main
 
 # ==========================================
 # ComfyUI
@@ -177,19 +182,19 @@ login-hf:
     @source external/ComfyUI/.venv-comfyui/bin/activate && huggingface-cli login
 
 # Start ComfyUI server
-start-comfyui:
+start-comfyui port="8188":
     @echo "Starting ComfyUI..."
-    cd external/ComfyUI && source .venv-comfyui/bin/activate && python main.py --listen
+    nix-shell --run "cd external/ComfyUI && uv run --no-project --python .venv-comfyui/bin/python python main.py --listen --port {{port}}"
 
 # Update ComfyUI and Manager
 sync-comfyui:
     #!/usr/bin/env bash
     set -e
     cd external/ComfyUI
-    git checkout master && git pull origin master
+    git checkout master && git pull --ff-only origin master
     if [ -d custom_nodes/comfyui-manager ]; then
         echo "Updating ComfyUI Manager..."
-        cd custom_nodes/comfyui-manager && git checkout main && git pull origin main
+        cd custom_nodes/comfyui-manager && git checkout main && git pull --ff-only origin main
     else
         echo "Cloning ComfyUI Manager..."
         git clone https://github.com/ltdrdata/ComfyUI-Manager.git custom_nodes/comfyui-manager

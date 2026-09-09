@@ -11,7 +11,7 @@ KOKORO_DIR="external/Kokoro-FastAPI"
 # Create virtual environment if it doesn't exist (in the root)
 if [ ! -d ".venv-kokoro" ]; then
     echo "Creating virtual environment in .venv-kokoro..."
-    uv venv .venv-kokoro
+    uv venv .venv-kokoro --python 3.12
 fi
 
 # Activate virtual environment
@@ -37,7 +37,7 @@ echo "Installing dependencies..."
 uv pip install -e ".[gpu]"
 
 echo "Downloading models..."
-python docker/scripts/download_model.py --output api/src/models/v1_0
+uv run --no-project --python "$PROJECT_ROOT/.venv-kokoro/bin/python" python docker/scripts/download_model.py --output api/src/models/v1_0
 
 echo "Starting Kokoro FastAPI..."
-uvicorn api.src.main:app --host 0.0.0.0 --port 8880
+exec uv run --no-project --python "$PROJECT_ROOT/.venv-kokoro/bin/python" uvicorn api.src.main:app --host 0.0.0.0 --port "${1:-8880}"

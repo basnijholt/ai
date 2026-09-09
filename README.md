@@ -12,7 +12,8 @@ All external projects are managed as git submodules in the `external/` directory
 *   **[ik_llama.cpp](https://github.com/ikawrakow/ik_llama.cpp):** A fork of llama.cpp with optimizations.
 *   **[Ollama](https://github.com/ollama/ollama):** Get up and running with large language models.
 *   **[Kokoro-FastAPI](https://github.com/remsky/Kokoro-FastAPI):** A Dockerized/FastAPI wrapper for the Kokoro TTS model.
-*   **[agent-cli](https://github.com/basnijholt/agent-cli):** CLI agent tool (used here for its `faster-whisper` server script).
+*   **[agent-cli](https://github.com/basnijholt/agent-cli):** CLI agent tool (used here for its Faster Whisper server).
+*   **[ComfyUI](https://github.com/comfyanonymous/ComfyUI):** Node-based image and video generation.
 
 ## 🛠️ Prerequisites
 
@@ -61,7 +62,22 @@ The `justfile` defines all available commands.
 | Command | Description |
 | :--- | :--- |
 | `just start-kokoro` | Starts the **Kokoro TTS** server (GPU accelerated). <br> *Automatically handles python venv and model downloads.* |
-| `just start-faster-whisper` | Starts the **Faster Whisper** ASR server on port 8811 (CUDA, float16). |
+| `just install-faster-whisper` | Installs agent-cli with its Faster Whisper server dependencies. |
+| `just start-faster-whisper` | Starts the **Faster Whisper** HTTP server on port 8811 (CUDA, float16, `large-v3`). |
+| `just install-comfyui` | Installs ComfyUI and Manager dependencies. |
+| `just start-comfyui` | Starts ComfyUI on port 8188 in the Nix environment. |
+
+Run `just install-faster-whisper` before its first launch. Use
+`just start-faster-whisper 18811 tiny` for a small model on an alternate port,
+`just start-kokoro 18880` or `just start-comfyui 18188` for alternate service ports. Whisper keeps
+models in its local environment cache and disables the optional Wyoming
+listener to avoid conflicts with existing services.
+
+`just sync` follows upstream development branches, which can include prereleases.
+After syncing, run `just build` and reinstall Python service dependencies.
+`just build` refreshes top-level CMake caches; `just rebuild` reuses the existing
+configuration. If Ollama's nested build caches reference deleted Nix compilers,
+run `just clean-ollama` before rebuilding it.
 
 ### Individual Project Commands
 You can also target specific projects:
